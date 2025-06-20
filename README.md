@@ -1,2 +1,3 @@
 # EarthquakesJapan
-WebHosting
+
+https://jungdae97.github.io/EarthquakesJapan/
