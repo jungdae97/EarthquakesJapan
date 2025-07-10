@@ -76,7 +76,29 @@
 </head>
 <body>
 
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyB3vLnw7QT2POb6Lp4sjgy23LWpmRcjTbU",
+    authDomain: "earthquakesjapan-937da.firebaseapp.com",
+    projectId: "earthquakesjapan-937da",
+    storageBucket: "earthquakesjapan-937da.firebasestorage.app",
+    messagingSenderId: "405323686356",
+    appId: "1:405323686356:web:acffd0d58650793119b641",
+    measurementId: "G-48TFVCB548"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
   
 </div>
 <div id="sidebar">
