@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Google 로그인 컴포넌트</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3vLnw7QT2POb6Lp4sjgy23LWpmRcjTbU",
+      authDomain: "earthquakesjapan-937da.firebaseapp.com",
+      projectId: "earthquakesjapan-937da",
+      storageBucket: "earthquakesjapan-937da.appspot.com",
+      messagingSenderId: "405323686356",
+      appId: "1:405323686356:web:acffd0d58650793119b641",
+      measurementId: "G-48TFVCB548"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
+
+    window.login = () => signInWithPopup(auth, provider);
+    window.logout = () => signOut(auth);
+
+    onAuthStateChanged(auth, (user) => {
+      const info = document.getElementById("userInfo");
+      if (user) {
+        info.innerHTML = `👤 ${user.displayName} (${user.email}) <button onclick="logout()">로그아웃</button>`;
+      } else {
+        info.innerHTML = `<button onclick="login()">🔐 Google 로그인</button>`;
+      }
+    });
+  </script>
+</head>
+<body style="padding: 20px;">
+  <h2>Google 로그인 컴포넌트</h2>
+  <div id="userInfo">...</div>
+</body>
+</html>

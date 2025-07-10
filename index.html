@@ -1,421 +1,47 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <title>일본 지진 지도 (조건 검색)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
-  <style>
-    body {
-  margin: 0;
-  display: flex;
-  flex-direction: row;
-  height: 100vh;
-  font-family: sans-serif;
-  overflow: hidden;
-}
-    #sidebar {
-      width: 260px;
-      background: #f8f8f8;
-      padding: 10px;
-      overflow-y: auto;
-      border-right: 1px solid #ccc;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
-      z-index: 1000;
-    }
-    #mapContainer {
-      flex-grow: 1;
-      height: 100vh;
-    }
-    #map {
-  width: 100%;
-  height: 100%;
-  overflow: hidden !important;
-  touch-action: none;
-}
-    input, select, button {
-      margin: 4px 0;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    ul { padding-left: 1em; }
-    li { margin-bottom: 4px; }
-    #toggleSidebar {
-  position: absolute;
-  top: 80px;
-  left: 270px;
-      z-index: 1100;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-    @media (max-width: 768px) {
-      #sidebar {
-        position: absolute;
-        transform: translateX(-100%);
-        height: 100vh;
-        background: #f8f8f8;
-      }
-      #sidebar.show {
-        transform: translateX(0);
-      }
-      #toggleSidebar {
-        left: 10px;
-      }
-    }
-#topbar input,
-#topbar button {
-  min-width: 60px;
-  flex: none;
-}
-</style>
-  </style>
-</head>
-<body>
+  <meta charset="UTF-8" />
+  <title>로그인 - 일본 지진 지도</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-
-  
-</div>
-<div id="sidebar">
-  <div style="display: flex; border-bottom: 1px solid #ccc;">
-    <button onclick="showTab('earthquake')" style="flex: 1; padding: 6px; background: #ddd; border: none;">지진 검색</button>
-    <button onclick="showTab('mapsearch')" style="flex: 1; padding: 6px; background: #f8f8f8; border: none;">지도 검색</button>
-  </div>
-  <div id="tab-earthquake" style="display: block;">
-  <label style="display: flex; flex-direction: column; font-weight: normal;">
-    <span class="lang-ko" data-ko="시작일:">시작일:</span>
-    <input type="date" id="startDate" value="">
-  </label>
-  <label style="display: flex; flex-direction: column; font-weight: normal;">
-    <span class="lang-ko" data-ko="종료일:">종료일:</span>
-    <input type="date" id="endDate" value="">
-  </label>
-  <label style="display: flex; flex-direction: column; font-weight: normal;">
-    <span class="lang-ko" data-ko="최소규모:">최소규모:</span>
-    <input type="number" id="minMag" value="5.0" step="0.1" min="0" style="width: 70px;">
-  </label>
-  <div style="display: flex; flex-direction: column; justify-content: flex-end;">
-    <button onclick="loadEarthquakes()" class="lang-ko" data-ko="지진 불러오기" style="padding: 2px 6px; font-size: 13px; height: 26px; white-space: nowrap;">지진 불러오기</button>
-  </div>
-  <div style="display: flex; align-items: center; gap: 6px;">
-  <input type="checkbox" id="togglePlates" checked onchange="togglePlateLayer()" style="width: 16px; height: 16px;">
-  <label for="togglePlates" style="margin: 0; flex: 1;">
-    <span class="lang-ko" data-ko="판 경계 표시">판 경계 표시</span>
-  </label>
-</div>
-  </div>
-  <div id="tab-mapsearch" style="display: none;">
-  <label>지도 언어:
-    <select id="langSelect" onchange="switchLanguage()">
-      <option value="ko">원어(Local)</option>
-      <option value="en">English</option>
-    </select>
-  </label>
-  <div style="display: flex; align-items: center; gap: 4px;">
-  <input type="text" id="searchLocation" placeholder="장소 검색" style="flex: 8; min-width: 0;" onkeydown="if(event.key==='Enter'){searchLocation();}">
-  <button onclick="searchLocation()" style="flex: 2; padding: 2px 6px; font-size: 13px; height: 26px;">이동</button>
-</div>
-  <button onclick="saveFavorite()">⭐ 즐겨찾기 저장</button>
-  <div id="favoriteList"><b>⭐ 즐겨찾기 목록:</b><ul id="favoriteItems"></ul></div>
-  
-</div>
-<script>
-function showTab(tab) {
-  document.getElementById('tab-earthquake').style.display = (tab === 'earthquake') ? 'block' : 'none';
-  document.getElementById('tab-mapsearch').style.display = (tab === 'mapsearch') ? 'block' : 'none';
-  const buttons = document.querySelectorAll('#sidebar button');
-  buttons.forEach((btn, i) => btn.style.background = i === 0 && tab === 'earthquake' || i === 1 && tab === 'mapsearch' ? '#ddd' : '#f8f8f8');
-}
-</script>
-</div>
-<div id="mapContainer">
-  <div id="map"></div>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-<script>
-function openStreetView(lat, lon) {
-  const url = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lon}`;
-  window.open(url, '_blank');
-}
-  // Set default date range to past 1 year
-  window.addEventListener('load', () => {
-  updateFavoriteList();
-  const today = new Date();
-  const end = today.toISOString().split('T')[0];
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  const start = oneYearAgo.toISOString().split('T')[0];
-
-  const savedStart = localStorage.getItem('startDate');
-  const savedEnd = localStorage.getItem('endDate');
-  const savedMag = localStorage.getItem('minMag');
-
-  document.getElementById('startDate').value = savedStart || start;
-  document.getElementById('endDate').value = savedEnd || end;
-  document.getElementById('minMag').value = savedMag || '5.0';
-
-  document.getElementById('startDate').addEventListener('change', e => localStorage.setItem('startDate', e.target.value));
-  document.getElementById('endDate').addEventListener('change', e => localStorage.setItem('endDate', e.target.value));
-  document.getElementById('minMag').addEventListener('change', e => localStorage.setItem('minMag', e.target.value));
-});
-</script>
-<script>
-function saveSearchedLocationAsFavorite(lat, lon, name) {
-  favorites.push({ name, lat, lon });
-  updateFavoriteList();
-  const marker = L.marker([lat, lon], {
-    icon: L.icon({
-      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-      shadowSize: [41, 41]
-    })
-  }).addTo(map).bindPopup(`<b>${name}</b><br/>(${lat.toFixed(4)}, ${lon.toFixed(4)})`).openPopup();
-
-  L.circle([lat, lon], {
-    radius: 100,
-    color: 'blue',
-    weight: 1,
-    fillOpacity: 0.1
-  }).addTo(map);
-}
-
-const map = L.map('map', { zoomControl: false }).setView([36, 138], 5);
-
-  const tileLayers = {
-    'ko': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors (Korean labels if available)'
-    }),
-    'en': L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://carto.com/">CartoDB</a> | OpenStreetMap contributors'
-    })
-  };
-
-  let currentTileLayer = tileLayers['ko'].addTo(map);
-  let quakeLayer = L.layerGroup().addTo(map);
-let language = 'ko';
-  let plateLayer;
-  let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-
-  fetch('https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json')
-    .then(res => res.json())
-    .then(data => {
-      plateLayer = L.geoJSON(data, {
-        style: {
-          color: 'blue',
-          weight: 2,
-          opacity: 0.7
-        }
-      }).addTo(map);
-    });
-
-  function togglePlateLayer() {
-    if (plateLayer) {
-      if (document.getElementById("togglePlates").checked) {
-        map.addLayer(plateLayer);
-      } else {
-        map.removeLayer(plateLayer);
-      }
-    }
-  }
-
-  function loadEarthquakes() {
-    quakeLayer.clearLayers();
-
-    const start = document.getElementById("startDate").value;
-    const end = document.getElementById("endDate").value;
-    const minMag = document.getElementById("minMag").value;
-
-    if (!start || !end || !minMag) {
-      alert(language === 'ko' ? "모든 입력 값을 채워주세요." : "Please fill in all fields.");
-      return;
-    }
-
-    const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${start}&endtime=${end}&minmagnitude=${minMag}&latitude=36&longitude=138&maxradiuskm=2000`;
-
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        data.features.forEach(eq => {
-          const [lon, lat, depth] = eq.geometry.coordinates;
-          const { mag, place, time } = eq.properties;
-          const dt = new Date(time).toISOString().replace('T', ' ').slice(0, 19);
-
-          L.circleMarker([lat, lon], {
-            radius: mag * 2,
-            color: mag >= 6 ? 'red' : mag >= 5 ? 'orange' : 'yellow',
-            fillOpacity: 0.6
-          }).addTo(quakeLayer).bindPopup(
-            `<b>${place}</b><br/>UTC: ${dt}<br/>Magnitude: ${mag}<br/>Depth: ${depth} km`
-          );
-        });
-
-        if (data.features.length === 0) {
-          alert(language === 'ko' ? "해당 조건에 맞는 지진이 없습니다." : "No earthquakes found for given conditions.");
-        }
-      })
-      .catch(e => {
-        alert(language === 'ko' ? "지진 데이터를 불러오는 데 실패했습니다." : "Failed to load earthquake data.");
-        console.error(e);
-      });
-  }
-
-  function searchLocation() {
-    const query = document.getElementById('searchLocation').value;
-    if (!query) return;
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
-      .then(response => response.json())
-      .then(data => {
-        if (data.length > 0) {
-          const place = data[0];
-          const lat = parseFloat(place.lat);
-          const lon = parseFloat(place.lon);
-          map.setView([lat, lon], 10);
-          const marker = L.marker([lat, lon]).addTo(map).bindPopup(`<b>${place.display_name}</b> <br/><button onclick='saveSearchedLocationAsFavorite(${lat}, ${lon}, "${place.display_name.replace(/'/g, "\'")}")'>⭐ 즐겨찾기 저장</button>`).openPopup();
-        } else {
-          alert(language === 'ko' ? "검색 결과가 없습니다." : "Location not found.");
-        }
-      });
-  }
-
-  let waitingForFavorite = false;
-
-function saveFavorite() {
-  waitingForFavorite = true;
-  map.getContainer().style.cursor = 'crosshair';
-}
-
-map.on('click', function(e) {
-  if (!waitingForFavorite) return;
-  waitingForFavorite = false;
-  map.getContainer().style.cursor = '';
-  const latlng = e.latlng;
-  const name = prompt(language === 'ko' ? "즐겨찾기 이름을 입력하세요:" : "Enter a name for the favorite location:");
-  if (name) {
-    favorites.push({ name, lat: latlng.lat, lon: latlng.lng });
-    updateFavoriteList();
-    updateFavoriteList();
-    const marker = L.marker([latlng.lat, latlng.lng], { icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png', shadowSize: [41, 41] }) }).addTo(map)
-      .bindPopup(`<b>${name}</b><br/>(${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)})`).openPopup();
-    L.circle([latlng.lat, latlng.lng], {
-      radius: 100,
-      color: 'blue',
-      weight: 1,
-      fillOpacity: 0.1
-    }).addTo(map);
-  }
-});
-      
-
-    function switchLanguage() {
-  language = document.getElementById('langSelect').value;
-  document.querySelectorAll('.lang-ko').forEach(el => {
-    el.textContent = language === 'ko' ? el.getAttribute('data-ko') || el.textContent :
-                                          el.getAttribute('data-en') || translateToEnglish(el.textContent);
-  });
-
-  map.removeLayer(currentTileLayer);
-  currentTileLayer = tileLayers[language];
-  currentTileLayer.addTo(map);
-}
-
-function translateToEnglish(korean) {
-    const dict = {
-      "시 작 일:": "Start Date:",
-      "종 료 일:": "End Date:",
-      "최소 규모:": "Min Magnitude:",
-      "지진 불러오기": "Load Earthquakes",
-      "판 경계 표시": "Show Plate Boundaries"
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3vLnw7QT2POb6Lp4sjgy23LWpmRcjTbU",
+      authDomain: "earthquakesjapan-937da.firebaseapp.com",
+      projectId: "earthquakesjapan-937da",
+      storageBucket: "earthquakesjapan-937da.appspot.com",
+      messagingSenderId: "405323686356",
+      appId: "1:405323686356:web:acffd0d58650793119b641",
+      measurementId: "G-48TFVCB548"
     };
-    return dict[korean] || korean;
-  }
-function updateFavoriteList() {
-  localStorage.setItem('favorites', JSON.stringify(favorites));
-  const listContainer = document.getElementById('favoriteItems');
-  if (!listContainer) return;
-  listContainer.innerHTML = favorites.map((fav, index) =>
-    `<li>
-      <div>${fav.name}</div>
-      <div style="display: flex; gap: 4px; margin-top: 2px;">
-        <button onclick="zoomToFavorite(${index})" style="flex: 1; padding: 2px 4px; font-size: 12px;">이동</button>
-        <button onclick="openStreetView(${fav.lat}, ${fav.lon})" style="flex: 1; padding: 2px 4px; font-size: 12px;">로드뷰</button>
-        <button onclick="deleteFavorite(${index})" style="flex: 1; padding: 2px 4px; font-size: 12px;">삭제</button>
-      </div>
-    </li>`
-  ).join('');
 
-  // 지도에 마커와 원 추가 (중복 방지 위해 기존 즐겨찾기 마커 제거)
-  map.eachLayer(layer => {
-    if (layer._isFavorite) {
-      map.removeLayer(layer);
-    }
-  });
-  favorites.forEach(fav => {
-    const marker = L.marker([fav.lat, fav.lon], {
-      icon: L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-        shadowSize: [41, 41]
-      })
-    }).addTo(map)
-      .bindPopup(`<b>${fav.name}</b><br/>(${fav.lat.toFixed(4)}, ${fav.lon.toFixed(4)})`);
-    marker._isFavorite = true;
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
 
-    const circle = L.circle([fav.lat, fav.lon], {
-      radius: 100,
-      color: 'blue',
-      weight: 1,
-      fillOpacity: 0.1
-    }).addTo(map);
-    circle._isFavorite = true;
-  });
-}
+    window.login = () => {
+      signInWithPopup(auth, provider)
+        .then(result => {
+          console.log("로그인 성공:", result.user);
+        })
+        .catch(error => {
+          alert("로그인 실패: " + error.message);
+        });
+    };
 
-function zoomToFavorite(index) {
-    const fav = favorites[index];
-    map.setView([fav.lat, fav.lon], 14);
-  }
-
-  function deleteFavorite(index) {
-  const fav = favorites[index];
-  favorites.splice(index, 1);
-  updateFavoriteList();
-
-  // 지도에서 해당 마커와 원 제거
-  map.eachLayer(layer => {
-    if (layer instanceof L.Marker || layer instanceof L.Circle) {
-      const latlng = layer.getLatLng();
-      if (latlng.lat.toFixed(4) == fav.lat.toFixed(4) && latlng.lng.toFixed(4) == fav.lon.toFixed(4)) {
-        map.removeLayer(layer);
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = "earthquakesJapan.html";
       }
-    }
-  });
-}
-</script>
-
-<div style="position: fixed; top: 10px; right: 10px; background: rgba(255,255,255,0.7); padding: 4px 8px; font-size: 12px; border-radius: 4px; z-index: 1100; text-align: right;">
-  &copy; 2025 Japan Earthquakes Map<br>jungdae97@gmail.com
-</div>
-<button id="toggleSidebar" onclick="toggleSidebar()" style="position: absolute; top: 10px; right: 10px; z-index: 1100; background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 4px 6px; font-size: 14px; height: auto; line-height: 1; width: 32px;">☰</button>
-<script>
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('show');
-}
-map.on('click', () => {
-  const sidebar = document.getElementById('sidebar');
-  if (sidebar.classList.contains('show')) {
-    sidebar.classList.remove('show');
-  }
-});
-</script>
+    });
+  </script>
+</head>
+<body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:sans-serif;">
+  <h2>일본 지진 지도 시스템</h2>
+  <p>Google 로그인 후 이용하실 수 있습니다.</p>
+  <button onclick="login()" style="padding:10px 20px; font-size:16px;">🔐 Google 로그인</button>
 </body>
 </html>
