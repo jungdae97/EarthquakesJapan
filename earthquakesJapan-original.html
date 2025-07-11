@@ -10,6 +10,12 @@
 </head>
 <body>
 
+  <div id="auth-status" style="position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.9); padding: 6px 10px; border-radius: 6px; z-index: 1100; font-size: 14px;">
+    <span id="user-info">로그인 확인 중...</span>
+    <button id="logout-btn" style="margin-left: 10px; display: none;">로그아웃</button>
+  </div>
+
+
 
   
 </div>
@@ -351,5 +357,23 @@ map.on('click', () => {
   }
 });
 </script>
+
+<script type="module">
+  import { initAuthStatus, logout } from "./firebase-auth.js";
+
+  initAuthStatus({
+    onLogin: (user) => {
+      const userInfo = document.getElementById("user-info");
+      const logoutBtn = document.getElementById("logout-btn");
+      userInfo.textContent = `👤 ${user.email}`;
+      logoutBtn.style.display = "inline-block";
+      logoutBtn.onclick = () => logout();
+    },
+    onLogout: () => {
+      window.location.href = "index.html";
+    }
+  });
+</script>
+
 </body>
 </html>
