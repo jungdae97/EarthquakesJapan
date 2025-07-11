@@ -4,44 +4,29 @@
   <meta charset="UTF-8" />
   <title>로그인 - 일본 지진 지도</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyB3vLnw7QT2POb6Lp4sjgy23LWpmRcjTbU",
-      authDomain: "earthquakesjapan-937da.firebaseapp.com",
-      projectId: "earthquakesjapan-937da",
-      storageBucket: "earthquakesjapan-937da.appspot.com",
-      messagingSenderId: "405323686356",
-      appId: "1:405323686356:web:acffd0d58650793119b641",
-      measurementId: "G-48TFVCB548"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-    const provider = new GoogleAuthProvider();
-
-    window.login = () => {
-      signInWithPopup(auth, provider)
-        .then(result => {
-          console.log("로그인 성공:", result.user);
-        })
-        .catch(error => {
-          alert("로그인 실패: " + error.message);
-        });
-    };
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.href = "earthquakesJapan-protected.html";
-      }
-    });
-  </script>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:sans-serif;">
   <h2>일본 지진 지도 시스템</h2>
   <p>Google 로그인 후 이용하실 수 있습니다.</p>
-  <button onclick="login()" style="padding:10px 20px; font-size:16px;">🔐 Google 로그인</button>
+  <button id="loginBtn" style="padding:10px 20px; font-size:16px;">🔐 Google 로그인</button>
+
+  <script type="module">
+    import { login, initAuthStatus } from "./firebase-auth.js";
+
+    document.getElementById("loginBtn").onclick = () => {
+      login().then(() => {
+        window.location.href = "earthquakesJapan-protected.html";
+      }).catch(error => {
+        alert("로그인 실패: " + error.message);
+      });
+    };
+
+    initAuthStatus({
+      onLogin: () => {
+        window.location.href = "earthquakesJapan-protected.html";
+      }
+    });
+  </script>
 </body>
 </html>

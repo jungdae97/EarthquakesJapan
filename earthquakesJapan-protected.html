@@ -4,34 +4,14 @@
   <meta charset="utf-8" />
   <title>일본 지진 지도 (Google 로그인 필요)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyB3vLnw7QT2POb6Lp4sjgy23LWpmRcjTbU",
-      authDomain: "earthquakesjapan-937da.firebaseapp.com",
-      projectId: "earthquakesjapan-937da",
-      storageBucket: "earthquakesjapan-937da.appspot.com",
-      messagingSenderId: "405323686356",
-      appId: "1:405323686356:web:acffd0d58650793119b641"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        // 로그인 안 된 경우 index.html로 이동
-        window.location.href = "index.html";
-      } else {
-        // 로그인 된 경우 원본 지도 페이지로 이동
-        window.location.href = "earthquakesJapan-original.html";
-      }
-    });
-  </script>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="firebase-auth.js"></script>
 </head>
 <body>
+  <div id="auth-status" style="position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.9); padding: 6px 10px; border-radius: 6px; z-index: 1100; font-size: 14px;">
+    <span id="user-info">로그인 확인 중...</span>
+    <button id="logout-btn" style="margin-left: 10px; display: none;">로그아웃</button>
+  </div>
   <h2 style="text-align:center; padding-top: 100px;">로그인 상태 확인 중입니다...</h2>
 </body>
 </html>

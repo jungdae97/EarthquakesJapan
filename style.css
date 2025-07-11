@@ -1,0 +1,64 @@
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  font-family: sans-serif;
+  overflow: hidden;
+}
+#sidebar {
+  width: 260px;
+  background: #f8f8f8;
+  padding: 10px;
+  overflow-y: auto;
+  border-right: 1px solid #ccc;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+#mapContainer {
+  flex-grow: 1;
+  height: 100vh;
+}
+#map {
+  width: 100%;
+  height: 100%;
+  overflow: hidden !important;
+  touch-action: none;
+}
+input, select, button {
+  margin: 4px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+ul { padding-left: 1em; }
+li { margin-bottom: 4px; }
+#toggleSidebar {
+  position: absolute;
+  top: 80px;
+  left: 270px;
+  z-index: 1100;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+@media (max-width: 768px) {
+  #sidebar {
+    position: absolute;
+    transform: translateX(-100%);
+    height: 100vh;
+    background: #f8f8f8;
+  }
+  #sidebar.show {
+    transform: translateX(0);
+  }
+  #toggleSidebar {
+    left: 10px;
+  }
+}
+#topbar input,
+#topbar button {
+  min-width: 60px;
+  flex: none;
+}
