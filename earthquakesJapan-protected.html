@@ -13,5 +13,24 @@
     <button id="logout-btn" style="margin-left: 10px; display: none;">로그아웃</button>
   </div>
   <h2 style="text-align:center; padding-top: 100px;">로그인 상태 확인 중입니다...</h2>
+
+<script type="module">
+  import { initAuthStatus, logout } from "./firebase-auth.js";
+
+  initAuthStatus({
+    onLogin: () => {
+      window.location.href = "earthquakesJapan-original.html";
+    },
+    onLogout: () => {
+      window.location.href = "index.html";
+    }
+  });
+
+  const logoutBtn = document.getElementById("logout-btn");
+  if (logoutBtn) {
+    logoutBtn.onclick = () => logout();
+  }
+</script>
+
 </body>
 </html>
