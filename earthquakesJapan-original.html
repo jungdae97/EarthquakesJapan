@@ -10,10 +10,7 @@
 </head>
 <body>
 
-  <div id="auth-status" style="position: fixed; top: 10px; left: 10px; background: rgba(255,255,255,0.9); padding: 6px 10px; border-radius: 6px; z-index: 1100; font-size: 14px;">
-    <span id="user-info">로그인 확인 중...</span>
-    <button id="logout-btn" style="margin-left: 10px; display: none;">로그아웃</button>
-  </div>
+  
 
 
 
@@ -23,7 +20,13 @@
   <div style="display: flex; border-bottom: 1px solid #ccc;">
     <button onclick="showTab('earthquake')" style="flex: 1; padding: 6px; background: #ddd; border: none;">지진 검색</button>
     <button onclick="showTab('mapsearch')" style="flex: 1; padding: 6px; background: #f8f8f8; border: none;">지도 검색</button>
+  
+  <hr style="margin-top:10px;">
+  <div style="font-size: 13px;">
+    <span id="user-info">로그인 확인 중...</span><br/>
+    <button id="logout-btn" style="margin-top: 5px; width: 100%; display: none;">로그아웃</button>
   </div>
+</div>
   <div id="tab-earthquake" style="display: block;">
   <label style="display: flex; flex-direction: column; font-weight: normal;">
     <span class="lang-ko" data-ko="시작일:">시작일:</span>
